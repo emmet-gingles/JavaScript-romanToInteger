@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Roman Conversion</title>
+<meta charset="windows-1252">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {	
+	// on button click event 
+	$("#submit").click(function(event){
+		// prevent page from reloading when form is submitted
+		event.preventDefault();
+		var convertTo = $("input:radio[name=convertTo]:checked").val();			// variable for what to convert the input to - taken from radio buttons
+		var input = $("#input").val();											// input variable - taken from text field
+		// check that input is not empty
+		if(input != ""){
+			// convert from integer to roman numerals
+			if(convertTo == "toRoman"){
+				// call function to get the output
+				output = toRoman(input);
+				// if there is a problem with the input alert the user
+				if(output == ""){
+					alert("Please enter a whole number greater than zero");
+				}
+				// else show the output
+				else{
+					$("#output").text("Output:  " + output);
+				}
+			}
+			// convert from roman numerals to integer
+			else{
+				// call function to get the output
+				output = toYear(input);	
+				// if there is a problem with the input alert the user
+				if(output == 0){
+					alert("Please enter only roman numerals");
+				}
+				// else show the output
+				else{
+					$("#output").text("Output:  " + output);
+				}
+			}		
+		}
+		else{
+			alert("Input cannot be null");
+		}
+	});
+	
+	// function to convert a number input into roman numerals
+	function toRoman(year){	
+		// check that input is a valid whole number
+		if(parseInt(year) != year){
+			return "";
+		}
+		// check that number is greater than zero
+		if(year <= 0){
+			return "";
+		}
+		var roman = "";						// variable to store the roman numerals
+		// need to convert integer to string in order to look at each digit individually
+		yearStr = year.toString();
+		var len = yearStr.length;			// length of the string
+		// loop through each string character
+		for(i=0;i< len;i++){
+			// if character is zero then we can ignore it and move on
+			if(yearStr[i] != "0"){	
+				// use the current value of i to get the value of the rest of the string and convert it to an integer
+				year = parseInt(yearStr.substring(i));
+				var counter 				// variable to store the total number of the same numerals to append
+				// each if statement corresponds to a different numeral
+				if(year >= 1000){
+					// divide the integer by 1000 and floor it to get the number of M's to append to roman
+					counter = Math.floor(year/1000);
+					for(j=0;j<counter;j++){
+						roman += "M";
+					}
+				}
+				// D is appended to roman followed by a C for every 100 greater than 500 
+				else if(year >= 500){
+					roman += "D";
+					counter = Math.floor((year - 500)/100);
+					if(counter >= 1){
+						for(j=0;j<counter;j++){
+							roman += "C";
+						}
+					}					
+				}
+				// C is appended to roman for every 100 
+				else if(year >= 100){
+					counter = Math.floor(year/100);
+					if(counter >= 1){
+						for(j=0;j<counter;j++){
+							roman += "C";
+						}
+					}					
+				}
+				// L is appended to roman followed by an X for every 10 greater than 50 
+				else if(year >= 50){
+					roman += "L";
+					counter = Math.floor((year - 50)/10);
+					if(counter >= 1){
+						for(j=0;j<counter;j++){
+							roman += "X";
+						}
+					}					
+				}
+				// X is appended to roman for every 10 
+				else if(year >= 10){
+					counter = Math.floor(year/10);
+					if(counter >= 1){
+						for(j=0;j<counter;j++){
+							roman += "X";
+						}
+					}					
+				}
+				// if it is 9 then append IX to roman, otherwise append V followed by an I for every 1 
+				else if(year >= 5){
+					if(year == 9){
+						roman += "IX";
+					}
+					else{
+						roman += "V";
+						counter = year - 5;
+						if(counter > 0){
+							for(j=0;j<counter;j++){
+								roman += "I";
+							}
+						}
+					}
+				}
+				// if it is 4 then append IV to roman, otherwise append I for every 1 
+				else if(year >= 1){
+					if(year == 4){
+						roman += "IV";
+					}
+					else{
+						counter = year/1;
+						for(j=0;j<counter;j++){
+							roman += "I";
+						}
+					}
+				}
+			}
+		}
+		// return the final value 
+		return roman;
+	}
+	
+	// function to convert a roman numerals input into a number 
+	function toYear(roman){
+		// check that there is input 
+		if(roman == null || roman.length == 0){
+			return "";
+		}
+		var year = 0;					// variable to store the number to be output
+		var len = roman.length;			// length of the input string 
+		// starting from the end of the string decrement backwards until we reach the beginning
+		for(i=len-1;i>=0;i--){
+			// get the current string character and convert it to uppercase
+			letter = roman[i].toUpperCase();
+			// switch statement that depending on the character increments the number. 
+			// for C, X and I checks need to be applied to determine how much to increment by 
+			// default case is for any character that is not one of the seven letters
+			switch(letter){
+				case "M":
+					year += 1000;
+					break;
+				case "D":
+					year += 500;
+					break;
+				case "C":
+					year += 100 * (year >= 500 ? -1:1);
+					break;
+				case "L":
+					year += 50;
+					break;
+				case "X":
+					year += 10 * (year >= 50 ? -1:1);
+					break;
+				case "V":
+					year += 5;
+					break;
+				case "I":
+					year += 1 * (year >= 5 ? -1:1);
+					break;
+				default:
+					year = 0;
+					break;
+			}
+			// in case the default is applied we must break out of loop 
+			if(year == 0){
+				break;
+			}
+		}
+		// return the final value 
+		return year;
+	}
+});
+</script>
+</head>
+<body>
+<form>
+	<label>Convert to: </label>
+	<input type="radio" value="toRoman" name="convertTo" checked="checked">Roman
+	<input type="radio" value="toYear" name="convertTo">Year
+	<br><input type="text" id="input">
+	<br><span id="output"></span>
+	<br><button id="submit">Convert</button>
+</form>
+</body>
+</html>
